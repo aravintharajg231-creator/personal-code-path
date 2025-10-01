@@ -14,7 +14,187 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lessons: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          id: string
+          language_id: string | null
+          order_index: number
+          title: string
+          xp_reward: number | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          language_id?: string | null
+          order_index: number
+          title: string
+          xp_reward?: number | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          language_id?: string | null
+          order_index?: number
+          title?: string
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "programming_languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      programming_languages: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          icon_url: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          icon_url?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          icon_url?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          lesson_id: string | null
+          progress_percentage: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          progress_percentage?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          progress_percentage?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_stats: {
+        Row: {
+          created_at: string | null
+          current_level: number | null
+          last_activity_date: string | null
+          lessons_completed: number | null
+          streak_days: number | null
+          total_xp: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_level?: number | null
+          last_activity_date?: string | null
+          lessons_completed?: number | null
+          streak_days?: number | null
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_level?: number | null
+          last_activity_date?: string | null
+          lessons_completed?: number | null
+          streak_days?: number | null
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
