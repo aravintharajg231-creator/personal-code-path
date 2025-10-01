@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import LessonCard from "@/components/LessonCard";
 import ProgressBar from "@/components/ProgressBar";
@@ -7,51 +7,109 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Flame, Target, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import badgeIcon from "@/assets/badge-icon.png";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [userStats] = useState({
-    level: 5,
-    xp: 1250,
-    xpToNextLevel: 1500,
-    streak: 7,
-    lessonsCompleted: 12,
+  const { toast } = useToast();
+  const [userStats, setUserStats] = useState({
+    level: 1,
+    xp: 0,
+    xpToNextLevel: 500,
+    streak: 0,
+    lessonsCompleted: 0,
   });
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const lessons = [
-    {
-      id: 1,
-      title: "Python Basics",
-      description: "Learn variables, data types, and basic operations",
-      progress: 100,
-      status: "completed" as const,
-      xp: 100,
-    },
-    {
-      id: 2,
-      title: "Control Flow",
-      description: "Master if statements, loops, and logic",
-      progress: 60,
-      status: "in-progress" as const,
-      xp: 150,
-    },
-    {
-      id: 3,
-      title: "Functions & Modules",
-      description: "Create reusable code with functions",
-      progress: 0,
-      status: "locked" as const,
-      xp: 200,
-    },
-    {
-      id: 4,
-      title: "Data Structures",
-      description: "Work with lists, dictionaries, and sets",
-      progress: 0,
-      status: "locked" as const,
-      xp: 250,
-    },
-  ];
+  useEffect(() => {
+    checkAuth();
+    fetchUserData();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+    }
+  };
+
+  const fetchUserData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
+      // Fetch user stats
+      const { data: stats } = await supabase
+        .from("user_stats")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (stats) {
+        setUserStats({
+          level: stats.current_level,
+          xp: stats.total_xp,
+          xpToNextLevel: stats.current_level * 500,
+          streak: stats.streak_days,
+          lessonsCompleted: stats.lessons_completed,
+        });
+      }
+
+      // Fetch all lessons with user progress
+      const { data: allLessons, error: lessonsError } = await supabase
+        .from("lessons")
+        .select(`
+          *,
+          programming_languages(name),
+          user_progress(status, progress_percentage)
+        `)
+        .order("order_index");
+
+      if (lessonsError) throw lessonsError;
+
+      const formattedLessons = allLessons?.map((lesson: any) => {
+        const userProgress = lesson.user_progress?.[0];
+        const status = userProgress?.status || "locked";
+        const progress = userProgress?.progress_percentage || 0;
+
+        return {
+          id: lesson.id,
+          title: lesson.title,
+          description: lesson.description,
+          progress,
+          status: status === "not-started" ? "locked" : status,
+          xp: lesson.xp_reward,
+        };
+      }) || [];
+
+      setLessons(formattedLessons);
+    } catch (error: any) {
+      console.error("Error fetching data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load your data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

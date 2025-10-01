@@ -1,9 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Code2, Sparkles } from "lucide-react";
+import { Code2, Sparkles, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Logged out",
+        description: "You've been successfully logged out.",
+      });
+      navigate("/");
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
@@ -21,16 +57,30 @@ const Navbar = () => {
           <Button variant="ghost" onClick={() => navigate("/")}>
             Home
           </Button>
+          {isLoggedIn && (
+            <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+              Dashboard
+            </Button>
+          )}
           <Button variant="ghost">
             About
           </Button>
-          <Button variant="outline" onClick={() => navigate("/auth")}>
-            Sign In
-          </Button>
-          <Button variant="hero" onClick={() => navigate("/auth")}>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Get Started
-          </Button>
+          {isLoggedIn ? (
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => navigate("/auth")}>
+                Sign In
+              </Button>
+              <Button variant="hero" onClick={() => navigate("/auth")}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Get Started
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>
