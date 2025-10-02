@@ -6,18 +6,49 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface CodeEditorProps {
   initialCode?: string;
+  language?: string;
   onRun?: (code: string) => void;
   onAIHelp?: (code: string) => void;
 }
 
-const CodeEditor = ({ initialCode = "", onRun, onAIHelp }: CodeEditorProps) => {
+const CodeEditor = ({ initialCode = "", language = "python", onRun, onAIHelp }: CodeEditorProps) => {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
 
-  const handleRun = () => {
-    if (onRun) {
-      onRun(code);
-      setOutput("Code executed successfully! ✓");
+  const handleRun = async () => {
+    setIsRunning(true);
+    setOutput("Running code...");
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute-code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ code, language }),
+      });
+
+      const result = await response.json();
+
+      if (result.run) {
+        const output = result.run.output || result.run.stdout || "";
+        const error = result.run.stderr || "";
+        setOutput(error ? `Error:\n${error}` : output || "Code executed successfully! ✓");
+      } else if (result.error) {
+        setOutput(`Error: ${result.error}`);
+      } else {
+        setOutput("Code executed successfully! ✓");
+      }
+
+      if (onRun) {
+        onRun(code);
+      }
+    } catch (error) {
+      setOutput(`Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`);
+    } finally {
+      setIsRunning(false);
     }
   };
 
@@ -45,9 +76,9 @@ const CodeEditor = ({ initialCode = "", onRun, onAIHelp }: CodeEditorProps) => {
               <Sparkles className="h-4 w-4 mr-2" />
               AI Help
             </Button>
-            <Button size="sm" variant="success" onClick={handleRun}>
+            <Button size="sm" variant="success" onClick={handleRun} disabled={isRunning}>
               <Play className="h-4 w-4 mr-2" />
-              Run
+              {isRunning ? "Running..." : "Run"}
             </Button>
           </div>
         </div>
@@ -61,9 +92,11 @@ const CodeEditor = ({ initialCode = "", onRun, onAIHelp }: CodeEditorProps) => {
       </Card>
 
       {output && (
-        <Card className="p-4 border-success/50 bg-success/5">
+        <Card className={`p-4 ${output.includes("Error") ? "border-destructive/50 bg-destructive/5" : "border-success/50 bg-success/5"}`}>
           <div className="flex items-start gap-2">
-            <div className="text-sm font-semibold text-success">Output:</div>
+            <div className={`text-sm font-semibold ${output.includes("Error") ? "text-destructive" : "text-success"}`}>
+              {output.includes("Error") ? "Error:" : "Output:"}
+            </div>
             <pre className="text-sm text-foreground flex-1 whitespace-pre-wrap">{output}</pre>
           </div>
         </Card>

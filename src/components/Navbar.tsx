@@ -62,7 +62,7 @@ const Navbar = () => {
               Dashboard
             </Button>
           )}
-          <Button variant="ghost">
+          <Button variant="ghost" onClick={() => navigate("/about")}>
             About
           </Button>
           {isLoggedIn ? (

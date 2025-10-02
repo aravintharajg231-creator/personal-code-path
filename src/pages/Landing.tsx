@@ -97,16 +97,16 @@ const Landing = () => {
 
           <div className="mt-12 flex items-center justify-center gap-8 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span>10,000+ Students</span>
-            </div>
-            <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-warning animate-pulse" />
               <span>50+ Lessons</span>
             </div>
             <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+              <span>100% Free</span>
+            </div>
+            <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-              <span>4.9★ Rating</span>
+              <span>AI-Powered</span>
             </div>
           </div>
         </div>
@@ -177,7 +177,7 @@ const Landing = () => {
               <img src={badgeIcon} alt="Badge" className="h-20 w-20 mx-auto mb-6" />
               <h2 className="text-4xl font-bold mb-4">Ready to Start Your Coding Journey?</h2>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of students learning to code with AI-powered personalized guidance
+                Start learning to code with AI-powered personalized guidance
               </p>
               <Button size="lg" variant="hero" onClick={() => navigate("/auth")} className="text-lg px-8">
                 <Sparkles className="mr-2 h-5 w-5" />
