@@ -57,14 +57,19 @@ const Navbar = () => {
           <Button variant="ghost" onClick={() => navigate("/")}>
             Home
           </Button>
-          {isLoggedIn && (
-            <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-              Dashboard
-            </Button>
-          )}
           <Button variant="ghost" onClick={() => navigate("/about")}>
             About
           </Button>
+          {isLoggedIn && (
+            <>
+              <Button variant="ghost" onClick={() => navigate("/courses")}>
+                Courses
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+                Dashboard
+              </Button>
+            </>
+          )}
           {isLoggedIn ? (
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />

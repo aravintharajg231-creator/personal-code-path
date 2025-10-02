@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import LessonCard from "@/components/LessonCard";
 import ProgressBar from "@/components/ProgressBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Flame, Target, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -191,21 +192,59 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Learning Path */}
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold mb-2">Your Learning Path</h2>
-          <p className="text-muted-foreground">Continue where you left off</p>
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <Card
+            className="gradient-card border-2 border-primary/50 hover:border-primary hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+            onClick={() => navigate("/courses")}
+          >
+            <CardContent className="p-8 text-center">
+              <div className="p-4 rounded-full bg-gradient-to-br from-primary to-accent inline-block mb-4 group-hover:scale-110 transition-transform">
+                <Target className="h-12 w-12 text-primary-foreground" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Browse Courses</h3>
+              <p className="text-muted-foreground mb-4">
+                Explore all available programming courses with complete roadmaps
+              </p>
+              <Button variant="hero" className="w-full">
+                View All Courses
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-accent/50">
+            <CardContent className="p-8 text-center">
+              <div className="p-4 rounded-full bg-accent/20 inline-block mb-4">
+                <TrendingUp className="h-12 w-12 text-accent" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Your Progress</h3>
+              <p className="text-muted-foreground mb-4">
+                {userStats.lessonsCompleted} lessons completed • Level {userStats.level}
+              </p>
+              <div className="text-3xl font-bold text-accent">{userStats.xp} XP</div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {lessons.map((lesson) => (
-            <LessonCard
-              key={lesson.id}
-              {...lesson}
-              onClick={() => navigate("/lesson/" + lesson.id)}
-            />
-          ))}
-        </div>
+        {/* Continue Learning */}
+        {lessons.length > 0 && (
+          <>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold mb-2">Continue Learning</h2>
+              <p className="text-muted-foreground">Pick up where you left off</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {lessons.slice(0, 6).map((lesson) => (
+                <LessonCard
+                  key={lesson.id}
+                  {...lesson}
+                  onClick={() => navigate("/lesson/" + lesson.id)}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
