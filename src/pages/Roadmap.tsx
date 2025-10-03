@@ -50,7 +50,7 @@ const Roadmap = () => {
 
       if (lessonsError) throw lessonsError;
 
-      // Fetch user progress
+      // Fetch user progress for lessons in THIS COURSE ONLY
       const { data: progressData } = await supabase
         .from("user_progress")
         .select("*")
@@ -82,14 +82,14 @@ const Roadmap = () => {
       return "completed";
     }
 
-    // First lesson in any course is always available
+    // First lesson of any course is always available
     if (lessonIndex === 0) {
       return progress ? "in-progress" : "available";
     }
 
-    // Check if previous lesson IN THE SAME COURSE is completed
-    const previousLessonInCourse = lessons[lessonIndex - 1];
-    const previousProgress = userProgress.find((p) => p.lesson_id === previousLessonInCourse.id);
+    // Check if previous lesson IN THIS COURSE is completed
+    const previousLesson = lessons[lessonIndex - 1];
+    const previousProgress = userProgress.find((p) => p.lesson_id === previousLesson.id);
 
     if (previousProgress?.status === "completed") {
       return progress ? "in-progress" : "available";
@@ -102,7 +102,7 @@ const Roadmap = () => {
     if (status === "locked") {
       toast({
         title: "Lesson Locked",
-        description: "Complete the previous lesson first!",
+        description: "Complete the previous lesson in this course first!",
         variant: "destructive",
       });
       return;
