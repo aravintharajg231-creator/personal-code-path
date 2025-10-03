@@ -16,7 +16,6 @@ const Lesson = () => {
   const [showAIFeedback, setShowAIFeedback] = useState(false);
   const [lesson, setLesson] = useState<any>(null);
   const [userProgress, setUserProgress] = useState<any>(null);
-  const [allLessons, setAllLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,20 +53,6 @@ const Lesson = () => {
         .eq("user_id", user.id)
         .eq("lesson_id", id)
         .single();
-
-      // Fetch all lessons to check order
-      const { data: allLessonsData } = await supabase
-        .from("lessons")
-        .select(
-          `
-          id,
-          order_index,
-          user_progress(status)
-        `
-        )
-        .order("order_index");
-
-      setAllLessons(allLessonsData || []);
 
       setLesson(lessonData);
       setUserProgress(progressData);
