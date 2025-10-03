@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle2, Circle, Lock, PlayCircle, Code2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, PlayCircle, Code2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ProgressBar from "@/components/ProgressBar";
@@ -82,32 +82,10 @@ const Roadmap = () => {
       return "completed";
     }
 
-    // First lesson of any course is always available
-    if (lessonIndex === 0) {
-      return progress ? "in-progress" : "available";
-    }
-
-    // Check if previous lesson IN THIS COURSE is completed
-    const previousLesson = lessons[lessonIndex - 1];
-    const previousProgress = userProgress.find((p) => p.lesson_id === previousLesson.id);
-
-    if (previousProgress?.status === "completed") {
-      return progress ? "in-progress" : "available";
-    }
-
-    return "locked";
+    return progress ? "in-progress" : "available";
   };
 
-  const handleStartLesson = async (lessonId: string, status: string) => {
-    if (status === "locked") {
-      toast({
-        title: "Lesson Locked",
-        description: "Complete the previous lesson in this course first!",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleStartLesson = async (lessonId: string) => {
     navigate(`/lesson/${lessonId}`);
   };
 
@@ -202,32 +180,25 @@ const Roadmap = () => {
             <div className="space-y-4">
               {lessons.map((lesson, index) => {
                 const status = getLessonStatus(index, lesson.id);
-                const isLocked = status === "locked";
                 const isCompleted = status === "completed";
                 const isInProgress = status === "in-progress";
 
                 return (
                   <Card
                     key={lesson.id}
-                    className={`gradient-card border-2 transition-all duration-300 ${
-                      isLocked
-                        ? "border-muted/30 opacity-60"
-                        : isCompleted
+                    className={`gradient-card border-2 transition-all duration-300 cursor-pointer ${
+                      isCompleted
                         ? "border-success/50 hover:border-success"
                         : isInProgress
                         ? "border-accent/50 hover:border-accent"
                         : "border-primary/30 hover:border-primary hover:shadow-xl"
-                    } ${!isLocked && "cursor-pointer"}`}
-                    onClick={() => handleStartLesson(lesson.id, status)}
+                    }`}
+                    onClick={() => handleStartLesson(lesson.id)}
                   >
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
                         <div className="flex-shrink-0">
-                          {isLocked ? (
-                            <div className="p-3 rounded-full bg-muted">
-                              <Lock className="h-6 w-6 text-muted-foreground" />
-                            </div>
-                          ) : isCompleted ? (
+                          {isCompleted ? (
                             <div className="p-3 rounded-full bg-success/20">
                               <CheckCircle2 className="h-6 w-6 text-success" />
                             </div>

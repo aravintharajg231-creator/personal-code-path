@@ -5,7 +5,7 @@ import CodeEditor from "@/components/CodeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle2, Sparkles, BookOpen, Lock } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Sparkles, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,7 +18,6 @@ const Lesson = () => {
   const [userProgress, setUserProgress] = useState<any>(null);
   const [allLessons, setAllLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
     checkAuthAndFetchLesson();
@@ -69,16 +68,6 @@ const Lesson = () => {
         .order("order_index");
 
       setAllLessons(allLessonsData || []);
-
-      // Check if lesson is locked (previous lesson not completed)
-      const currentLessonIndex = allLessonsData?.findIndex((l) => l.id === id);
-      if (currentLessonIndex && currentLessonIndex > 0) {
-        const previousLesson = allLessonsData[currentLessonIndex - 1];
-        const prevProgress = previousLesson.user_progress?.[0];
-        if (!prevProgress || prevProgress.status !== "completed") {
-          setIsLocked(true);
-        }
-      }
 
       setLesson(lessonData);
       setUserProgress(progressData);
@@ -181,32 +170,6 @@ const Lesson = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading lesson...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLocked) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 pt-24 pb-12">
-          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          <Card className="max-w-2xl mx-auto gradient-card border-2 border-warning/50">
-            <CardContent className="p-12 text-center">
-              <Lock className="h-20 w-20 text-warning mx-auto mb-6" />
-              <h2 className="text-3xl font-bold mb-4">Lesson Locked</h2>
-              <p className="text-muted-foreground text-lg">
-                Complete the previous lesson to unlock this one. Keep learning step by step!
-              </p>
-              <Button size="lg" onClick={() => navigate("/dashboard")} className="mt-8">
-                Back to Dashboard
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     );
