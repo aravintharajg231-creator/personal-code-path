@@ -82,12 +82,14 @@ const Roadmap = () => {
       return "completed";
     }
 
+    // First lesson in any course is always available
     if (lessonIndex === 0) {
       return progress ? "in-progress" : "available";
     }
 
-    const previousLesson = lessons[lessonIndex - 1];
-    const previousProgress = userProgress.find((p) => p.lesson_id === previousLesson.id);
+    // Check if previous lesson IN THE SAME COURSE is completed
+    const previousLessonInCourse = lessons[lessonIndex - 1];
+    const previousProgress = userProgress.find((p) => p.lesson_id === previousLessonInCourse.id);
 
     if (previousProgress?.status === "completed") {
       return progress ? "in-progress" : "available";
