@@ -7,6 +7,28 @@ import { Label } from "@/components/ui/label";
 import { Code2, Mail, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email({ message: "Please enter a valid email address" })
+    .max(255, { message: "Email must be less than 255 characters" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(72, { message: "Password must be less than 72 characters" })
+    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+  name: z
+    .string()
+    .trim()
+    .min(1, { message: "Name is required" })
+    .max(100, { message: "Name must be less than 100 characters" })
+    .optional(),
+});
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -31,13 +53,31 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate input
+      const validationData = isSignUp 
+        ? { email, password, name }
+        : { email, password, name: undefined };
+      
+      const validation = authSchema.safeParse(validationData);
+      
+      if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        toast({
+          title: "Validation Error",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: validation.data.email,
+          password: validation.data.password,
           options: {
             data: {
-              full_name: name,
+              full_name: validation.data.name || "",
             },
             emailRedirectTo: `${window.location.origin}/dashboard`,
           },
@@ -52,8 +92,8 @@ const Auth = () => {
         navigate("/dashboard");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: validation.data.email,
+          password: validation.data.password,
         });
 
         if (error) throw error;
@@ -65,9 +105,16 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
+      // Sanitize error messages for security
+      const userMessage = error.message?.includes("Invalid login credentials")
+        ? "Invalid email or password"
+        : error.message?.includes("User already registered")
+        ? "An account with this email already exists"
+        : "Authentication failed. Please try again.";
+      
       toast({
         title: "Error",
-        description: error.message || "Something went wrong",
+        description: userMessage,
         variant: "destructive",
       });
     } finally {

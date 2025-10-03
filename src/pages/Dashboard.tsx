@@ -90,10 +90,9 @@ const Dashboard = () => {
 
       setLessons(formattedLessons);
     } catch (error: any) {
-      console.error("Error fetching data:", error);
       toast({
         title: "Error",
-        description: "Failed to load your data",
+        description: "Unable to load your dashboard. Please refresh the page.",
         variant: "destructive",
       });
     } finally {

@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, RotateCcw, Sparkles } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface CodeEditorProps {
   initialCode?: string;
@@ -15,29 +17,25 @@ const CodeEditor = ({ initialCode = "", language = "python", onRun, onAIHelp }: 
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
+  const { toast } = useToast();
 
   const handleRun = async () => {
     setIsRunning(true);
     setOutput("Running code...");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/execute-code`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ code, language }),
+      const { data, error } = await supabase.functions.invoke("execute-code", {
+        body: { code, language },
       });
 
-      const result = await response.json();
+      if (error) throw error;
 
-      if (result.run) {
-        const output = result.run.output || result.run.stdout || "";
-        const error = result.run.stderr || "";
+      if (data.run) {
+        const output = data.run.output || data.run.stdout || "";
+        const error = data.run.stderr || "";
         setOutput(error ? `Error:\n${error}` : output || "Code executed successfully! ✓");
-      } else if (result.error) {
-        setOutput(`Error: ${result.error}`);
+      } else if (data.error) {
+        setOutput(`Error: ${data.error}`);
       } else {
         setOutput("Code executed successfully! ✓");
       }
@@ -45,8 +43,17 @@ const CodeEditor = ({ initialCode = "", language = "python", onRun, onAIHelp }: 
       if (onRun) {
         onRun(code);
       }
-    } catch (error) {
-      setOutput(`Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`);
+    } catch (error: any) {
+      const errorMessage = error?.message?.includes("JWT") || error?.message?.includes("authorization")
+        ? "Please sign in to run code"
+        : "Unable to execute code. Please try again.";
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setOutput(`Error: ${errorMessage}`);
     } finally {
       setIsRunning(false);
     }

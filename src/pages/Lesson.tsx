@@ -93,10 +93,9 @@ const Lesson = () => {
         });
       }
     } catch (error) {
-      console.error("Error fetching lesson:", error);
       toast({
         title: "Error",
-        description: "Failed to load lesson",
+        description: "Unable to load this lesson. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -168,10 +167,9 @@ const Lesson = () => {
         navigate("/dashboard");
       }, 2000);
     } catch (error) {
-      console.error("Error completing lesson:", error);
       toast({
         title: "Error",
-        description: "Failed to complete lesson",
+        description: "Unable to complete lesson. Please try again.",
         variant: "destructive",
       });
     }

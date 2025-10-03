@@ -21,7 +21,7 @@ export type Database = {
           description: string | null
           difficulty: string | null
           id: string
-          language_id: string | null
+          language_id: string
           order_index: number
           title: string
           xp_reward: number | null
@@ -32,7 +32,7 @@ export type Database = {
           description?: string | null
           difficulty?: string | null
           id?: string
-          language_id?: string | null
+          language_id: string
           order_index: number
           title: string
           xp_reward?: number | null
@@ -43,7 +43,7 @@ export type Database = {
           description?: string | null
           difficulty?: string | null
           id?: string
-          language_id?: string | null
+          language_id?: string
           order_index?: number
           title?: string
           xp_reward?: number | null
@@ -111,31 +111,31 @@ export type Database = {
           completed_at: string | null
           created_at: string | null
           id: string
-          lesson_id: string | null
+          lesson_id: string
           progress_percentage: number | null
           status: string | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           completed_at?: string | null
           created_at?: string | null
           id?: string
-          lesson_id?: string | null
+          lesson_id: string
           progress_percentage?: number | null
           status?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           completed_at?: string | null
           created_at?: string | null
           id?: string
-          lesson_id?: string | null
+          lesson_id?: string
           progress_percentage?: number | null
           status?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
