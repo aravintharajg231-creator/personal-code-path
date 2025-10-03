@@ -82,10 +82,11 @@ const Roadmap = () => {
       return "completed";
     }
 
+    // All lessons are available - no locking system
     return progress ? "in-progress" : "available";
   };
 
-  const handleStartLesson = async (lessonId: string) => {
+  const handleStartLesson = async (lessonId: string, status: string) => {
     navigate(`/lesson/${lessonId}`);
   };
 
@@ -193,7 +194,7 @@ const Roadmap = () => {
                         ? "border-accent/50 hover:border-accent"
                         : "border-primary/30 hover:border-primary hover:shadow-xl"
                     }`}
-                    onClick={() => handleStartLesson(lesson.id)}
+                    onClick={() => handleStartLesson(lesson.id, status)}
                   >
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
